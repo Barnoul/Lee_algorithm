@@ -97,6 +97,7 @@ Window {
                 else if (Qt.LeftButton && Cursor.cursorStatus == 0) {
                     Grid.allCells[clickedTile.num].color = "lightgrey"
                     Grid.allCells[clickedTile.num].status = 0
+                    Grid.allCells[clickedTile.num].cost = 0
                     if (clickedTile.num == startIndex) {
                         isStartPlaced = false
                     }
@@ -115,7 +116,8 @@ Window {
     }
 
     function check(parentIndex, newIndex) {
-        if (0 <= newIndex && newIndex <= 999 && !Grid.allCells[newIndex].visited) {
+        if (0 <= newIndex && newIndex <= 999 && !Grid.allCells[newIndex].visited &&
+                !(newIndex % 40 == 0 && parentIndex % 40 == 39 || newIndex % 40 == 39 && parentIndex % 40 == 0)) {
             if (!Grid.allCells[newIndex].status == 1) {
                 if (Grid.allCells[newIndex].cost > 0) {
                     Grid.allCells[newIndex].cost = Math.min(Grid.allCells[newIndex].cost, Grid.allCells[parentIndex].cost + 1);
@@ -165,24 +167,21 @@ Window {
         }
     }
 
-    /*
+
     function reset() {
-        //Grid.allCells = [];
-        for (var y = 0; y <= 24; y += 1) {
-            for (var x = 0; x <= 39; x += 1) {
-                var currentTile = field.childAt(x * 40, y * 40);
-                currentTile.num = x + y;
-                Grid.allCells[currentTile.num].cost = 0;
-                Grid.allCells[currentTile.num].status = 0;
-                Grid.allCells[currentTile.num].color = "lightgrey";
-            }
+        for (var i = 0; i < 1000; i += 1) {
+            Grid.allCells[i].cost = 0;
+            Grid.allCells[i].status = 0;
+            Grid.allCells[i].color = "lightgrey";
+            Grid.allCells[i].visited = false;
         }
         mouseArea.isStartPlaced = false;
         mouseArea.isFinishPlaced = false;
         mouseArea.startIndex = 0;
         mouseArea.finishIndex = 0;
+        impossible.visible = false;
     }
-    */
+
 
     function pathBack(finish) {
         var filter = [];
@@ -210,8 +209,11 @@ Window {
             console.log("mincost " + minCost);
             nextTile = directions[filter.indexOf(minCost)];
             console.log("nexttile " + nextTile);
-            Grid.allCells[nextTile].color = "green";
-            Grid.allCells[nextTile].path = true;
+            if (minCost > 0) {
+                Grid.allCells[nextTile].color = "green";
+                Grid.allCells[nextTile].path = true;
+            }
+
             filter = [];
             directions = [];
             finish = nextTile;
@@ -221,8 +223,15 @@ Window {
         }
 
     }
-
-
+    /*
+    Text {
+        id: impossible
+        font.pointSize: 40
+        visible: false
+        color: "red"
+        text: "IMPOSSIBLE"
+    }
+    */
     Rectangle {
         id: menu
         height: 440
@@ -318,7 +327,7 @@ Window {
             }
         }
 
-        /*
+
         Button {
             id: buttonReset
             height: 50
@@ -331,7 +340,7 @@ Window {
             }
             onClicked: reset();
         }
-        */
+
 
         Button {
             id: buttonGo
@@ -340,16 +349,25 @@ Window {
             text: "Go"
             anchors {
                 left: parent.left
-                bottom: parent.bottom
+                bottom: buttonReset.top
                 margins: 20
             }
             onClicked: {
                 lee(mouseArea.startIndex);
                 pathBack(mouseArea.finishIndex);
-                Grid.allCells[mouseArea.startIndex].color = "red";
+                /*
+                var ct = 0;
+                for (var i = 0; i < 1000; i += 1) {
+                    if (Grid.allCells[i].color == "green") {
+                        ct += 1;
+                    }
+                }
+                if (ct ==  0) {
+                    impossible.visible = true;
+                }
+                */
             }
         }
-
     }
 }
 
