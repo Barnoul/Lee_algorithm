@@ -194,6 +194,11 @@ Window {
             if (Grid.allCells[i].status != 1 && Grid.allCells[i].status != 5) {
                 resetGrid(i)
             }
+            if (Grid.allCells[i].status == 5) {
+                resetGrid(i)
+                Grid.allCells[i].status = 5
+                Grid.allCells[i].color = "yellow"
+            }
         }
     }
 
